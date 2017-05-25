@@ -128,9 +128,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
                     }
                     break;
                 case "+":
-                    /*for (Iterator<String> iter = queue.iterator(); iter.hasNext(); )
+                    for (Iterator<String> iter = queue.iterator(); iter.hasNext(); )
                         StdOut.print(iter.next() + " ");
-                    StdOut.println();*/
+                    StdOut.println();
                     Iterator<String> iter1 = queue.iterator();
                     Iterator<String> iter2 = queue.iterator();
                     while (iter1.hasNext()) StdOut.print(iter1.next() + " ");
@@ -142,8 +142,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
                     queue.enqueue(item);
                     break;
             }
-
-            //StdOut.println("(" + queue.size() + " left on queue)");
         }
     }
 }
