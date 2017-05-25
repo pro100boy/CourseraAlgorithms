@@ -76,23 +76,30 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
      * @return an iterator that iterates over the items in the queue in arbitrary order
      */
     public Iterator<Item> iterator() {
-        shuffleArray();
         return new ArrayIterator();
     }
 
     // Implementing Fisher–Yates shuffle
-    private void shuffleArray() {
+    private void shuffleArray(Item[] r) {
         for (int i = n - 1; i > 0; i--) {
             int j = StdRandom.uniform(0, i + 1);
-            Item tmp = q[j];
-            q[j] = q[i];
-            q[i] = tmp;
+            Item tmp = r[j];
+            r[j] = r[i];
+            r[i] = tmp;
         }
     }
 
     // an iterator, doesn't implement remove() since it's optional
     private class ArrayIterator implements Iterator<Item> {
         private int i = 0;
+        // The order of two or more iterators to the same randomized queue must be mutually independent;
+        // each iterator must maintain its own random order
+        private Item[] r = (Item[]) new Object[n];
+
+        public ArrayIterator() {
+            System.arraycopy(q, 0, r, 0, n);
+            shuffleArray(r);
+        }
 
         public boolean hasNext() {
             return i < n;
@@ -104,7 +111,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
-            return q[i++];
+            return r[i++];
         }
     }
 
@@ -121,8 +128,14 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
                     }
                     break;
                 case "+":
-                    for (Iterator<String> iter = queue.iterator(); iter.hasNext(); )
+                    /*for (Iterator<String> iter = queue.iterator(); iter.hasNext(); )
                         StdOut.print(iter.next() + " ");
+                    StdOut.println();*/
+                    Iterator<String> iter1 = queue.iterator();
+                    Iterator<String> iter2 = queue.iterator();
+                    while (iter1.hasNext()) StdOut.print(iter1.next() + " ");
+                    StdOut.println();
+                    while (iter2.hasNext()) StdOut.print(iter2.next() + " ");
                     StdOut.println();
                     break;
                 default:
