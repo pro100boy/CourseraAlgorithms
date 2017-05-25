@@ -72,6 +72,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     /**
      * Returns an iterator that iterates over the items in the queue in arbitrary order.
+     *
      * @return an iterator that iterates over the items in the queue in arbitrary order
      */
     public Iterator<Item> iterator() {
@@ -80,20 +81,26 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
 
     // Implementing Fisher–Yates shuffle
-    private void shuffleArray()
-    {
+    private void shuffleArray() {
         for (int i = n - 1; i > 0; i--) {
-            int j = StdRandom.uniform(0, i+1);
+            int j = StdRandom.uniform(0, i + 1);
             Item tmp = q[j];
             q[j] = q[i];
             q[i] = tmp;
         }
     }
+
     // an iterator, doesn't implement remove() since it's optional
     private class ArrayIterator implements Iterator<Item> {
         private int i = 0;
-        public boolean hasNext()  { return i < n;                               }
-        public void remove()      { throw new UnsupportedOperationException();  }
+
+        public boolean hasNext() {
+            return i < n;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
