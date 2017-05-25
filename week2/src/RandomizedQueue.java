@@ -51,7 +51,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         n++;
     }
 
-    // remove and return a random item >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // remove and return a random item
     public Item dequeue() {
         if (isEmpty()) throw new NoSuchElementException();
         int randomIndex = StdRandom.uniform(0, n);
@@ -59,11 +59,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         q[randomIndex] = q[n - 1];                            // to avoid loitering
         last = --n;
         q[last] = null;
-        //n--;
-
-        //first++;
-        //if (first == q.length) first = 0;           // wrap-around
-        // shrink size of array if necessary
         if (n > 0 && n == q.length / 4) resize(q.length / 2);
         return item;
     }
