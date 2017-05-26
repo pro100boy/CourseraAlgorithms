@@ -100,6 +100,21 @@ public class Point implements Comparable<Point> {
         return (o1, o2) -> Double.compare(slopeTo(o1), slopeTo(o2));
     }
 
+    // is a->b->c a counter-clockwise turn?
+    // +1 if counter-clockwise, -1 if clockwise, 0 if collinear
+    private int ccw(Point a, Point b, Point c) {
+        // return a.x*b.y - a.y*b.x + a.y*c.x - a.x*c.y + b.x*c.y - b.y*c.x;
+        double area2 = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+        if      (area2 < 0) return -1;
+        else if (area2 > 0) return +1;
+        else                return  0;
+    }
+
+    // is a-b-c collinear?
+    public boolean isCollinear(Point a, Point b, Point c) {
+        return ccw(a, b, c) == 0;
+    }
+
     /**
      * Unit tests the Point data type.
      */
