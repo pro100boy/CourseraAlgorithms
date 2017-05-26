@@ -69,7 +69,7 @@ public class FastCollinearPoints {
     }
 
     // bottom-up mergesort
-    public static void sort(Point[] a, Comparator<Point> comparator) {
+    private static void sort(Point[] a, Comparator<Point> comparator) {
         int N = a.length;
         Point[] aux = new Point[N];
         for (int n = 1; n < N; n = n + n) {
