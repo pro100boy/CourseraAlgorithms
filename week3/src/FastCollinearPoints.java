@@ -8,34 +8,39 @@ public class FastCollinearPoints {
         Objects.requireNonNull(points);
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
         checkRepeatedPoints(points);
-        int pointsCount = points.length;
-        List<LineSegment> segmentList = new ArrayList<>();
-        // Go each point p.
-        for (int p = 0; p < pointsCount; p++) {
-            // Sort the points according to the slopes they makes with p.
-            sort(points, points[p].slopeOrder());
-            // Check if any 3 (or more) adjacent points in the sorted order have equal slopes with respect to p
-            List<Point> collinearPoints = new ArrayList<>(pointsCount);
-            for (int q = 0; q < pointsCount - 1; q++) {
-                if (p == q) {
-                    continue;
-                }
-                if (collinearPoints.isEmpty()) {
-                    collinearPoints.add(points[q]);
-                } else if (points[p].slopeTo(points[q - 1]) == points[p].slopeTo(points[q])) {
-                    collinearPoints.add(points[q]);
-                } else if (collinearPoints.size() > 2) {
-                    collinearPoints.add(points[p]);
-                    Collections.sort(collinearPoints);
-                    segmentList.add(new LineSegment(Collections.min(collinearPoints), Collections.max(collinearPoints)));
-                    break;
+        Point[] pointsCopySO = Arrays.copyOf(points, points.length);
+        Point[] pointsCopyNO = Arrays.copyOf(points, points.length);
+        ArrayList<LineSegment> segmentsList = new ArrayList<LineSegment>();
+        Arrays.sort(pointsCopyNO);
+        for (int i = 0; i < pointsCopyNO.length; ++i) {
+            Point origin = pointsCopyNO[i];
+            Arrays.sort(pointsCopySO);
+            Arrays.sort(pointsCopySO, origin.slopeOrder());
+            int count = 1;
+            Point lineBeginning = null;
+            for (int j = 0; j < pointsCopySO.length - 1; ++j) {
+                if (pointsCopySO[j].slopeTo(origin) == pointsCopySO[j + 1].slopeTo(origin)) {
+                    count++;
+                    if (count == 2) {
+                        lineBeginning = pointsCopySO[j];
+                        count++;
+                    } else if (count >= 4 && j + 1 == pointsCopySO.length - 1) {
+                        if (lineBeginning.compareTo(origin) > 0) {
+                            segmentsList.add(new LineSegment(origin, pointsCopySO[j + 1]));
+                        }
+                        count = 1;
+                    }
+                } else if (count >= 4) {
+                    if (lineBeginning.compareTo(origin) > 0) {
+                        segmentsList.add(new LineSegment(origin, pointsCopySO[j]));
+                    }
+                    count = 1;
                 } else {
-                    collinearPoints.clear();
-                    collinearPoints.add(points[q]);
+                    count = 1;
                 }
             }
         }
-        segments = segmentList.toArray(new LineSegment[segmentList.size()]);
+        segments = segmentsList.toArray(new LineSegment[segmentsList.size()]);
     }
 
     // the number of line segments
