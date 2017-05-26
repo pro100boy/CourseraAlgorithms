@@ -14,14 +14,30 @@ public class BruteCollinearPoints {
         checkDuplicatedEntries(points);
 
         List<LineSegment> segmentList = new ArrayList<>();
-        for (int i = 0; i < points.length - 3; i++) {
-            Point p = points[i];
-            Point q = points[i + 1];
-            Point r = points[i + 2];
-            Point s = points[i + 3];
-            if (p.isCollinear(q, r, s)) segmentList.add(new LineSegment(p, s));
+
+        for (int p = 0; p < points.length - 3; p++) {
+            Point P = points[p];
+            for (int q = p + 1; q < points.length - 2; q++) {
+                Point Q = points[q];
+                for (int r = q + 1; r < points.length - 1; r++) {
+                    Point R = points[r];
+                    for (int s = r + 1; s < points.length; s++) {
+                        Point S = points[s];
+
+                        if (isCollinear(P, Q, R, S))
+                            segmentList.add(new LineSegment(P, S));
+
+                    }
+                }
+            }
         }
+
         segments = segmentList.toArray(new LineSegment[segmentList.size()]);
+    }
+
+    // is a-b-c collinear?
+    private boolean isCollinear(Point p, Point q, Point r, Point s) {
+        return p.slopeTo(q) == p.slopeTo(r) && p.slopeTo(q) == p.slopeTo(s);
     }
 
     // the number of line segments
