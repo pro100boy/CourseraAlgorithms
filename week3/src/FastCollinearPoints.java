@@ -35,12 +35,21 @@ public class FastCollinearPoints {
                 if (tmpList.size() >= 3) {
                     tmpList.addLast(p);
                     Collections.sort(tmpList);
-                    segmentsList.add(new LineSegment(tmpList.getFirst(), tmpList.getLast()));
+                    LineSegment lineSegment = new LineSegment(tmpList.getFirst(), tmpList.getLast());
+                    if (!containSegment(segmentsList, lineSegment)) segmentsList.add(lineSegment);
                 }
             }
         }
 
         segments = segmentsList.toArray(new LineSegment[segmentsList.size()]);
+    }
+
+    private boolean containSegment(List<LineSegment> segmentsList, LineSegment lineSegment)
+    {
+        boolean res = false;
+        for (LineSegment l : segmentsList)
+            if (l.toString().equals(lineSegment.toString())) res = true;
+        return res;
     }
 
     // the number of line segments
