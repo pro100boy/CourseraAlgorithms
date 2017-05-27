@@ -10,20 +10,19 @@ public class FastCollinearPoints {
         checkRepeatedPoints(points);
 
         List<LineSegment> segmentsList = new LinkedList<>();
-        Point[] tmpArr = points.clone();
+        Point[] pointsCopy = Arrays.copyOf(points, points.length);
 
-        for (int i = 0; i < points.length; i++) {
+        for (Point startPoint : points) {
             // origin point
-            Point p = points[i];
-            sort(tmpArr, p.slopeOrder());
+            Arrays.sort(pointsCopy, startPoint.slopeOrder());
             Map<Double, LinkedList<Point>> map = new HashMap<>();
 
-            for (int j = 0; j < tmpArr.length; j++) {
-                Point q = tmpArr[j];
-                if (q.compareTo(p) == 0) continue;
+            for (int j = 1; j < pointsCopy.length; j++) {
+                Point q = pointsCopy[j];
+                //if (q.compareTo(startPoint) == 0) continue;
 
                 // adding points into map according to their slopes
-                double d = q.slopeTo(p);
+                double d = q.slopeTo(startPoint);
                 LinkedList<Point> tmpList = map.getOrDefault(d, new LinkedList<>());
                 tmpList.add(q);
                 map.put(d, tmpList);
@@ -33,7 +32,7 @@ public class FastCollinearPoints {
             for (Map.Entry<Double, LinkedList<Point>> m : map.entrySet()) {
                 LinkedList<Point> tmpList = m.getValue();
                 if (tmpList.size() >= 3) {
-                    tmpList.addLast(p);
+                    tmpList.addLast(startPoint);
                     Collections.sort(tmpList);
                     LineSegment lineSegment = new LineSegment(tmpList.getFirst(), tmpList.getLast());
                     if (!containSegment(segmentsList, lineSegment)) segmentsList.add(lineSegment);
@@ -44,11 +43,13 @@ public class FastCollinearPoints {
         segments = segmentsList.toArray(new LineSegment[segmentsList.size()]);
     }
 
-    private boolean containSegment(List<LineSegment> segmentsList, LineSegment lineSegment)
-    {
+    private boolean containSegment(List<LineSegment> segmentsList, LineSegment lineSegment) {
         boolean res = false;
         for (LineSegment l : segmentsList)
-            if (l.toString().equals(lineSegment.toString())) res = true;
+            if (l.toString().equals(lineSegment.toString())) {
+                res = true;
+                break;
+            }
         return res;
     }
 
@@ -59,56 +60,17 @@ public class FastCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        return segments;
-    }
-
-    /***********************************************************************
-     *  Bottom-Up merge sorting functions
-     ***********************************************************************/
-
-    // stably merge a[lo..m] with a[m+1..hi] using aux[lo..hi]
-    private static void merge(Point[] a, Point[] aux, int lo, int m, int hi, Comparator<Point> comparator) {
-        // copy to aux[]
-        for (int k = lo; k <= hi; k++) {
-            aux[k] = a[k];
-        }
-        // merge back to a[]
-        int i = lo, j = m + 1;
-        for (int k = lo; k <= hi; k++) {
-            if (i > m) a[k] = aux[j++];
-            else if (j > hi) a[k] = aux[i++];
-            else if (less(comparator, aux[j], aux[i])) a[k] = aux[j++];
-            else a[k] = aux[i++];
-        }
-    }
-
-    // bottom-up mergesort
-    private static void sort(Point[] a, Comparator<Point> comparator) {
-        int N = a.length;
-        Point[] aux = new Point[N];
-        for (int n = 1; n < N; n = n + n) {
-            for (int i = 0; i < N - n; i += n + n) {
-                int lo = i;
-                int m = i + n - 1;
-                int hi = Math.min(i + n + n - 1, N - 1);
-                merge(a, aux, lo, m, hi, comparator);
-            }
-        }
-    }
-
-    /***********************************************************************
-     *  Helper sorting functions
-     ***********************************************************************/
-
-    // is v < w ?
-    private static boolean less(Comparator<Point> comparator, Point v, Point w) {
-        return comparator.compare(v, w) < 0;
+        return Arrays.copyOf(segments, numberOfSegments());
     }
 
     private void checkRepeatedPoints(Point[] points) {
-        Arrays.sort(points);
-        for (int i = 0; i < points.length - 1; i++)
-            if (points[i].compareTo(points[i + 1]) == 0)
-                throw new IllegalArgumentException("Duplicated entries in given points.");
+        //Arrays.sort(points);
+        for (int i = 0; i < points.length - 1; i++) {
+            for (int j = i + 1; j < points.length; j++) {
+                if (points[i].compareTo(points[j]) == 0) {
+                    throw new IllegalArgumentException("Duplicated entries in given points.");
+                }
+            }
+        }
     }
 }

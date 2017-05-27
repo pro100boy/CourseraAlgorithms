@@ -13,19 +13,20 @@ public class BruteCollinearPoints {
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
         checkDuplicatedEntries(points);
 
+        Point[] pointsCopy = Arrays.copyOf(points, points.length);
         List<LineSegment> segmentList = new ArrayList<>();
 
-        for (int p = 0; p < points.length - 3; p++) {
-            Point P = points[p];
-            for (int q = p + 1; q < points.length - 2; q++) {
-                Point Q = points[q];
-                for (int r = q + 1; r < points.length - 1; r++) {
-                    Point R = points[r];
-                    for (int s = r + 1; s < points.length; s++) {
-                        Point S = points[s];
+        for (int a = 0; a < pointsCopy.length - 3; a++) {
+            Point p = pointsCopy[a];
+            for (int b = a + 1; b < pointsCopy.length - 2; b++) {
+                Point q = pointsCopy[b];
+                for (int c = b + 1; c < pointsCopy.length - 1; c++) {
+                    Point r = pointsCopy[c];
+                    for (int d = c + 1; d < pointsCopy.length; d++) {
+                        Point s = pointsCopy[d];
 
-                        if (isCollinear(P, Q, R, S))
-                            segmentList.add(new LineSegment(P, S));
+                        if (isCollinear(p, q, r, s))
+                            segmentList.add(new LineSegment(p, s));
 
                     }
                 }
@@ -47,7 +48,7 @@ public class BruteCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        return segments;
+        return Arrays.copyOf(segments, numberOfSegments());
     }
 
     private void checkDuplicatedEntries(Point[] points) {
