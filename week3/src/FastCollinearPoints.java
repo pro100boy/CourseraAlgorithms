@@ -8,38 +8,38 @@ public class FastCollinearPoints {
         Objects.requireNonNull(points);
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
         checkRepeatedPoints(points);
-        Point[] pointsCopySO = Arrays.copyOf(points, points.length);
-        Point[] pointsCopyNO = Arrays.copyOf(points, points.length);
-        ArrayList<LineSegment> segmentsList = new ArrayList<LineSegment>();
-        Arrays.sort(pointsCopyNO);
-        for (int i = 0; i < pointsCopyNO.length; ++i) {
-            Point origin = pointsCopyNO[i];
-            Arrays.sort(pointsCopySO);
-            Arrays.sort(pointsCopySO, origin.slopeOrder());
-            int count = 1;
-            Point lineBeginning = null;
-            for (int j = 0; j < pointsCopySO.length - 1; ++j) {
-                if (pointsCopySO[j].slopeTo(origin) == pointsCopySO[j + 1].slopeTo(origin)) {
-                    count++;
-                    if (count == 2) {
-                        lineBeginning = pointsCopySO[j];
-                        count++;
-                    } else if (count >= 4 && j + 1 == pointsCopySO.length - 1) {
-                        if (lineBeginning.compareTo(origin) > 0) {
-                            segmentsList.add(new LineSegment(origin, pointsCopySO[j + 1]));
-                        }
-                        count = 1;
-                    }
-                } else if (count >= 4) {
-                    if (lineBeginning.compareTo(origin) > 0) {
-                        segmentsList.add(new LineSegment(origin, pointsCopySO[j]));
-                    }
-                    count = 1;
-                } else {
-                    count = 1;
+
+        List<LineSegment> segmentsList = new LinkedList<>();
+        Point[] tmpArr = points.clone();
+
+        for (int i = 0; i < points.length; i++) {
+            // origin point
+            Point p = points[i];
+            sort(tmpArr, p.slopeOrder());
+            Map<Double, LinkedList<Point>> map = new HashMap<>();
+
+            for (int j = 0; j < tmpArr.length; j++) {
+                Point q = tmpArr[j];
+                if (q.compareTo(p) == 0) continue;
+
+                // adding points into map according to their slopes
+                double d = q.slopeTo(p);
+                LinkedList<Point> tmpList = map.getOrDefault(d, new LinkedList<>());
+                tmpList.add(q);
+                map.put(d, tmpList);
+            }
+
+            // determine list with 4+ points with same slopes
+            for (Map.Entry<Double, LinkedList<Point>> m : map.entrySet()) {
+                LinkedList<Point> tmpList = m.getValue();
+                if (tmpList.size() >= 3) {
+                    tmpList.addLast(p);
+                    Collections.sort(tmpList);
+                    segmentsList.add(new LineSegment(tmpList.getFirst(), tmpList.getLast()));
                 }
             }
         }
+
         segments = segmentsList.toArray(new LineSegment[segmentsList.size()]);
     }
 
