@@ -1,88 +1,126 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
 
+/**
+ * A fast method of examining points and checking whether they lie on the same line segment. Specifically, this is done
+ * using stable sorting methods alongside a sliding window approach. Every line segment is collinear with at least four
+ * or more points.
+ */
 public class FastCollinearPoints {
-    //private LineSegment[] segments;
-    private HashMap<Double, List<Point>> foundSegments = new HashMap<>();
-    private List<LineSegment> segments = new ArrayList<>();
 
-    // finds all line segments containing 4 or more points
+    // The minimum number of "other" collinear points needed for line segment to exist. "Origin" point excluded.
+    private static final int MIN_OTHER_COLLINEAR_POINTS = 3;
+
+    // Holds all line segments found
+    private LineSegment[] lineSegments;
+
+    /**
+     * Instantiate by finding all line segments which are collinear with four or more points from a valid set of points.
+     *
+     * @param points array to find line segments in.
+     */
     public FastCollinearPoints(Point[] points) {
         Objects.requireNonNull(points);
+        /**
+         * Checks for any null items in points array.
+         * Useful for exception handling.
+         */
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
-        checkRepeatedPoints(points);
-        Point[] pointsCopy = Arrays.copyOf(points, points.length);
 
-        for (Point startPoint : points) {
-            Arrays.sort(pointsCopy, startPoint.slopeOrder());
+        if (hasRepeatedPoints(points)) {
+            throw new IllegalArgumentException("Repeated points are contained in the array.");
+        }
 
-            List<Point> slopePoints = new ArrayList<>();
-            double slope = 0;
-            double previousSlope = Double.NEGATIVE_INFINITY;
+        lineSegments = findLineSegments(points.clone());  // cloning to prevent mutation of user input.
+    }
 
-            for (int i = 1; i < pointsCopy.length; i++) {
-                slope = startPoint.slopeTo(pointsCopy[i]);
-                if (slope == previousSlope) {
-                    slopePoints.add(pointsCopy[i]);
-                } else {
-                    if (slopePoints.size() >= 3) {
-                        slopePoints.add(startPoint);
-                        addSegmentIfNew(slopePoints, previousSlope);
+    /**
+     * Finds all line segments which are collinear with four or more points. This is done using stable sorting methods
+     * alongside a sliding window approach.
+     *
+     * @param points array to find line segments in.
+     * @return array of all line segments found.
+     */
+    private LineSegment[] findLineSegments(Point[] points) {
+        ArrayList<LineSegment> tempLineSegments = new ArrayList<>();
+        Point[] others = points.clone();
+        for (Point origin : points) {
+            // These sorts are stable. Hence, relative ordering of points by position is maintained even after ordering
+            // points by slope with origin.
+            Arrays.sort(others);
+            Arrays.sort(others, origin.slopeOrder());  // lowest element will always be the origin/degenerate point.
+
+            int first = 1;  // First point considered collinear with origin (based on relative position).
+            int end = first;  // End point of potential line segment.
+            Comparator<Point> slopeOrder = origin.slopeOrder();
+
+            // Compare two "other" points per iteration (current and previous); sliding window of length two.
+            for (int i = first; i < others.length; i++) {
+                // Are the slopes of the current and previous "other" points the same?
+                // In the first iteration, slopeEqual == false since others[0] is always the origin/degenerate point,
+                // which is always unique.
+                boolean slopesEqual = (slopeOrder.compare(others[i - 1], others[i]) == 0);
+
+                // Is the origin a start point of a potential line segment? Prevents sub-segments from being added.
+                boolean originIsStart = (origin.compareTo(others[first]) < 0);
+                if (slopesEqual) {
+                    end++;  // Must increment before check.
+
+                    // Valid line segment? This is a special case where the final point creates a valid line segment.
+                    if ((i == (others.length - 1)) &&
+                            ((1 + end - first) >= MIN_OTHER_COLLINEAR_POINTS) && originIsStart) {
+                        tempLineSegments.add(new LineSegment(origin, others[others.length - 1]));
                     }
-                    slopePoints.clear();
-                    slopePoints.add(pointsCopy[i]);
-                }
-                previousSlope = slope;
-            }
+                } else {  // Different slopes
+                    if (((1 + end - first) >= MIN_OTHER_COLLINEAR_POINTS) && originIsStart) {  // Valid line segment?
+                        tempLineSegments.add(new LineSegment(origin, others[i - 1]));
+                    }
 
-            if (slopePoints.size() >= 3) {
-                slopePoints.add(startPoint);
-                addSegmentIfNew(slopePoints, slope);
-            }
-        }
-    }
-
-    private void addSegmentIfNew(List<Point> slopePoints, double slope) {
-        List<Point> endPoints = foundSegments.get(slope);
-        Collections.sort(slopePoints);
-
-        Point startPoint = slopePoints.get(0);
-        Point endPoint = slopePoints.get(slopePoints.size() - 1);
-
-        if (endPoints == null) {
-            endPoints = new ArrayList<>();
-            endPoints.add(endPoint);
-            foundSegments.put(slope, endPoints);
-            segments.add(new LineSegment(startPoint, endPoint));
-        } else {
-            for (Point currentEndPoint : endPoints) {
-                if (currentEndPoint.compareTo(endPoint) == 0) {
-                    return;
+                    // Reset to find next possible line segment.
+                    first = i;
+                    end = i;
                 }
             }
-            endPoints.add(endPoint);
-            segments.add(new LineSegment(startPoint, endPoint));
         }
+        return tempLineSegments.toArray(new LineSegment[tempLineSegments.size()]);
     }
 
-
-    // the number of line segments
+    /**
+     * Number of line segments that were found based on given points.
+     *
+     * @return number of line segments.
+     */
     public int numberOfSegments() {
-        return segments.size();
+        return lineSegments.length;
     }
 
-    // the line segments
+    /**
+     * Line segments that were found based on given points.
+     *
+     * @return array of line segments found.
+     */
     public LineSegment[] segments() {
-        return segments.toArray(new LineSegment[segments.size()]);
+        return lineSegments.clone();
     }
 
-    private void checkRepeatedPoints(Point[] points) {
-        //Arrays.sort(points);
-        for (int i = 0; i < points.length - 1; i++) {
+    /**
+     * Check for repeated/duplicate points in points array.
+     * Useful for exception handling.
+     *
+     * @param points array to check.
+     * @return true if there are repeated points, false if not.
+     */
+    private boolean hasRepeatedPoints(Point[] points) {
+        for (int i = 0; i < points.length; i++) {
             for (int j = i + 1; j < points.length; j++) {
-                if (points[i].compareTo(points[j]) == 0) {
-                    throw new IllegalArgumentException("Duplicated entries in given points.");
+                // Same reference or same point in terms of (x, y) location?
+                if (points[i] == points[j] || points[i].compareTo(points[j]) == 0) {
+                    return true;
                 }
             }
         }
+        return false;
     }
 }
