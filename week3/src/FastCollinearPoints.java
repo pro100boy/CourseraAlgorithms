@@ -4,8 +4,9 @@ public class FastCollinearPoints {
     //private LineSegment[] segments;
     private HashMap<Double, List<Point>> foundSegments = new HashMap<>();
     private List<LineSegment> segments = new ArrayList<>();
+
     // finds all line segments containing 4 or more points
-    public FastCollinearPoints(final Point[] points) {
+    public FastCollinearPoints(Point[] points) {
         Objects.requireNonNull(points);
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
         checkRepeatedPoints(points);

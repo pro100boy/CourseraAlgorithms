@@ -5,14 +5,15 @@ import java.util.Objects;
 
 public class BruteCollinearPoints {
     private LineSegment[] segments;
-    Point[] pointsCopy;
+
     // finds all line segments containing 4 points
-    public BruteCollinearPoints(final Point[] points) {
+    public BruteCollinearPoints(Point[] points) {
         // Throws NullPointerException if obj is null
         Objects.requireNonNull(points);
         Arrays.stream(points).forEach(p -> Objects.requireNonNull(p));
-        checkDuplicatedEntries(points);
-        pointsCopy = Arrays.copyOf(points, points.length);
+
+        Point[] pointsCopy = Arrays.copyOf(points, points.length);
+        checkDuplicatedEntries(pointsCopy);
 
         List<LineSegment> segmentList = new ArrayList<>();
 
@@ -52,9 +53,9 @@ public class BruteCollinearPoints {
     }
 
     private void checkDuplicatedEntries(Point[] points) {
-        Arrays.sort(pointsCopy);
-        for (int i = 0; i < pointsCopy.length - 1; i++)
-            if (pointsCopy[i].compareTo(pointsCopy[i + 1]) == 0)
+        Arrays.sort(points);
+        for (int i = 0; i < points.length - 1; i++)
+            if (points[i].compareTo(points[i + 1]) == 0)
                 throw new IllegalArgumentException("Duplicated entries in given points.");
     }
 }
