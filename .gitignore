@@ -29,3 +29,5 @@ out/
 /src/task3/incomingdata.txt
 src/task3/incomingdata.txt
 !/algs4.jar
+/week4/8puzzle/
+/week3/collinear/
