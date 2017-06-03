@@ -1,7 +1,5 @@
-import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.Stack;
-
-import java.util.Objects;
+import edu.princeton.cs.algs4.StdRandom;
 
 /**
  * Created by Paul Galushkin on 01/06/2017.
@@ -14,8 +12,6 @@ public class Board {
     // You may assume that the constructor receives an n-by-n array containing the n2 integers between 0 and n2 − 1,
     // where 0 represents the blank square.
     public Board(int[][] blocks) {
-        // check for null
-        Objects.requireNonNull(blocks);
         this.blocks = new int[blocks.length][blocks.length];
         for (int i = 0; i < blocks.length; i++) {
             this.blocks[i] = blocks[i].clone();

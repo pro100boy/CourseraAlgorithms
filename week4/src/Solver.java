@@ -3,6 +3,8 @@ import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.Objects;
+
 /**
  * Created by Paul Galushkin on 01/06/2017.
  */
@@ -13,9 +15,7 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        if (initial == null) {
-            throw new NullPointerException("Null board provided.");
-        }
+        Objects.requireNonNull(initial, "Null board provided.");
 
         // Initial board
         MinPQ<Node> nodesPQ = new MinPQ<>();
